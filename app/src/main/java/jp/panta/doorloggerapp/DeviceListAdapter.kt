@@ -8,6 +8,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import jp.panta.doorloggerapp.databinding.ItemDeviceBinding
 import androidx.recyclerview.widget.DiffUtil.ItemCallback
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 
 class DeviceListAdapter : ListAdapter<BluetoothDevice, DeviceListAdapter.ViewHolder>(DiffItemCallback){
 
@@ -28,11 +32,35 @@ class DeviceListAdapter : ListAdapter<BluetoothDevice, DeviceListAdapter.ViewHol
         }
     }
 
+    private var _listeners =setOf<(BluetoothDevice)->Unit>()
+
+    fun addClickListener(callback: (BluetoothDevice)->Unit) {
+        _listeners = _listeners.toMutableSet().apply {
+            add(callback)
+        }
+    }
+
+    fun removeClickListener(callback: (BluetoothDevice)->Unit) {
+        _listeners = _listeners.toMutableSet().apply {
+            remove(callback)
+        }
+    }
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.onBind(getItem(position))
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(DataBindingUtil.inflate<ItemDeviceBinding>(LayoutInflater.from(parent.context), R.layout.item_device, parent, false))
+    }
+}
+
+@ExperimentalCoroutinesApi
+fun DeviceListAdapter.listenDeviceClick(): Flow<BluetoothDevice> = channelFlow<BluetoothDevice> {
+    val callback: (BluetoothDevice) -> Unit = {
+        offer(it)
+    }
+    addClickListener(callback)
+    awaitClose {
+        removeClickListener(callback)
     }
 }

@@ -53,5 +53,9 @@ class DeviceListViewModel : ViewModel(){
         }
     }
 
+    fun clear() {
+        _devices.value = emptyList()
+    }
+
 
 }
