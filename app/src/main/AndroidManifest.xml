@@ -24,7 +24,8 @@
 
                 <data
                     android:host="device_connection"
-                    android:scheme="doorloggerapp" />
+                    android:scheme="doorloggerapp"
+                    android:pathPattern=".*"/>
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity">
