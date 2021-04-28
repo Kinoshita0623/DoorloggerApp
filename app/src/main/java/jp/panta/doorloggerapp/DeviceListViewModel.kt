@@ -23,7 +23,11 @@ class DeviceListViewModel : ViewModel(){
 
 
     fun addDevices(list: List<BluetoothDevice>) {
-        val ex = _devices.value
+        val ex = _devices.value.map {
+            list.firstOrNull { n ->
+                n.address == it.address
+            }?: it
+        }
         val new = list.filter { i ->
             !ex.any { j->
                 i.address == j.address
@@ -35,7 +39,9 @@ class DeviceListViewModel : ViewModel(){
     }
 
     fun addDevice(device: BluetoothDevice) {
-        val ex = _devices.value
+        val ex = _devices.value.map {
+            if(it.address == device.address) device else it
+        }
         val has = ex.any {
             it.address == device.address
         }
